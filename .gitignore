@@ -70,3 +70,6 @@ Thumbs.db
 # Others
 # =========================================
 __MACOSX/
+
+# Local Netlify folder
+.netlify
