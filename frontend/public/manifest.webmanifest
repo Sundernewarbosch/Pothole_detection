@@ -1,0 +1,21 @@
+{
+  "name": "Pothole Detection",
+  "short_name": "PotholeApp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/256.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -22,7 +22,16 @@ function YoloTest() {
           video.srcObject.getTracks().forEach(track => track.stop());
         }
 
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" }, // back camera
+            width: { ideal: 1280 },  // prefer 1280px width
+            height: { ideal: 720 },  // prefer 720px height
+            frameRate: { ideal: 30 } // optional, smooth video
+          }
+        });
+
+
         video.srcObject = stream;
 
         await new Promise(resolve => {
@@ -54,7 +63,7 @@ function YoloTest() {
 
     const frame = canvas.toDataURL("image/jpeg");
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/detect/", {
+      const res = await fetch("https://192.168.9.4:8000/api/detect/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: frame })
