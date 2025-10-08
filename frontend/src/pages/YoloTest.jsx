@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import "./YoloTest.css";
 
 function YoloTest() {
   const videoRef = useRef(null);
@@ -17,18 +18,14 @@ function YoloTest() {
     async function setupCamera() {
       try {
         const video = videoRef.current;
-
         if (video.srcObject) {
           video.srcObject.getTracks().forEach(track => track.stop());
         }
-
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
-
         await new Promise(resolve => {
           video.onloadedmetadata = () => resolve();
         });
-
         video.muted = true;
         await video.play();
       } catch (err) {
@@ -43,13 +40,11 @@ function YoloTest() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-
     if (!video || !canvas) return;
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
     setStreaming(false);
 
     const frame = canvas.toDataURL("image/jpeg");
@@ -89,61 +84,29 @@ function YoloTest() {
     }
   };
 
-  const containerStyle = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    marginTop: "20px",
-    width: "100%",
-  };
-
-  const wrapperStyle = {
-    position: "relative",
-    width: isMobile ? "90%" : "80%",
-    maxWidth: "800px",
-    aspectRatio: isMobile ? "9/16" : "16/9",
-  };
-
-  const mediaStyle = {
-    width: "100%",
-    height: "100%",
-    borderRadius: "10px",
-    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-    objectFit: "cover",
-  };
-
-  const buttonStyle = {
-    marginTop: "15px",
-    padding: "12px 25px",
-    fontSize: "16px",
-    borderRadius: "8px",
-    border: "none",
-    backgroundColor: "#ff4d4f",
-    color: "white",
-    cursor: "pointer",
-  };
-
   return (
-    <div style={containerStyle}>
-      <h1 style={{ textAlign: "center" }}>Pothole Detection</h1>
+    <div className="yolo-container">
+      <h1>Pothole Detection</h1>
 
-      <div style={wrapperStyle}>
+      <div className="yolo-wrapper">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          style={{ ...mediaStyle, display: streaming ? "block" : "none" }}
+          className="yolo-video"
+          style={{ display: streaming ? "block" : "none" }}
         />
         <canvas
           ref={canvasRef}
-          style={{ ...mediaStyle, display: streaming ? "none" : "block" }}
+          className="yolo-canvas"
+          style={{ display: streaming ? "none" : "block" }}
         />
       </div>
 
       <button
         onClick={streaming ? captureAndDetect : resetCamera}
-        style={buttonStyle}
+        className="yolo-button"
       >
         {streaming ? "Capture Image" : "Resume Camera"}
       </button>

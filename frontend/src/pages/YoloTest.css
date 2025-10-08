@@ -1,0 +1,48 @@
+/* YoloTest.css */
+
+.yolo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* margin-top: 20px; */
+  width: 100%;
+  min-height: 10vh;
+}
+
+.yolo-container h1 {
+  text-align: center;
+}
+
+.yolo-wrapper {
+  position: relative;
+  width: 80%;
+  max-width: 800px;
+  aspect-ratio: 16/9;
+}
+
+@media (max-width: 768px) {
+  .yolo-wrapper {
+    width: 90%;
+    aspect-ratio: 9/14;
+  }
+}
+
+.yolo-video,
+.yolo-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  object-fit: cover;
+}
+
+.yolo-button {
+  margin-top: 15px;
+  padding: 12px 25px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #ff4d4f;
+  color: white;
+  cursor: pointer;
+}
