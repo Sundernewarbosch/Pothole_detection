@@ -15,6 +15,7 @@
 
 .yolo-wrapper {
   position: relative;
+  display: inline-block;
   width: 80%;
   max-width: 800px;
   aspect-ratio: 16/9;
@@ -45,4 +46,22 @@
   background-color: #ff4d4f;
   color: white;
   cursor: pointer;
+}
+
+.location-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 200px;
+}
+
+.error-text {
+  color: #ff6b6b;
+  font-weight: bold;
 }

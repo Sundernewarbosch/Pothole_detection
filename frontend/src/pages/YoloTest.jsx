@@ -6,6 +6,9 @@ function YoloTest() {
   const canvasRef = useRef(null);
   const [streaming, setStreaming] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [location, setLocation] = useState(null);
+  const [city, setCity] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -14,7 +17,7 @@ function YoloTest() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
+    useEffect(() => {
     async function setupCamera() {
       try {
         const video = videoRef.current;
@@ -35,6 +38,44 @@ function YoloTest() {
 
     setupCamera();
   }, []);
+
+
+  useEffect(() => {
+      async function fetchLocation() {
+        if (!("geolocation" in navigator)) {
+          setError("Geolocation is not supported by your browser.");
+          return;
+        }
+
+        try {
+          const getPosition = () =>
+            new Promise((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject);
+            });
+
+          const position = await getPosition();
+          const { latitude, longitude } = position.coords;
+          setLocation({ latitude, longitude });
+
+          // Fetch city name using reverse geocoding (OpenStreetMap API)
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await response.json();
+          const cityName =
+            data.address.city ||
+            data.address.town ||
+            data.address.village ||
+            data.address.county ||
+            "Unknown location";
+          setCity(cityName);
+        } catch (err) {
+          setError("Permission denied or unable to fetch location.");
+        }
+      }
+
+      fetchLocation();
+    }, []);
 
   const captureAndDetect = async () => {
     const video = videoRef.current;
@@ -102,6 +143,24 @@ function YoloTest() {
           className="yolo-canvas"
           style={{ display: streaming ? "none" : "block" }}
         />
+
+        {/* 🔹 Overlay location info */}
+        <div className="location-overlay">
+          {error && <p className="error-text">{error}</p>}
+          {location ? (
+            <>
+              <p>
+                <strong>{city}</strong>
+              </p>
+              <p>
+                Lat: {location.latitude.toFixed(5)} <br />
+                Lng: {location.longitude.toFixed(5)}
+              </p>
+            </>
+          ) : (
+            !error && <p>Requesting location...</p>
+          )}
+        </div>
       </div>
 
       <button
@@ -111,6 +170,7 @@ function YoloTest() {
         {streaming ? "Capture Image" : "Resume Camera"}
       </button>
     </div>
+
   );
 }
 
