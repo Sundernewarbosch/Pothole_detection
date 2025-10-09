@@ -81,11 +81,40 @@
 }
 
 @keyframes fadein {
-  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 @keyframes fadeout {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.share-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(77, 77, 77, 0.2);
+  border: none;
+  padding: 8px;
+  border-radius: 5%;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.share-button:hover {
+  background: rgba(77, 77, 77, 0.8);
 }
