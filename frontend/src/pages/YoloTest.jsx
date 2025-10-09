@@ -9,6 +9,21 @@ function YoloTest() {
   const [location, setLocation] = useState(null);
   const [city, setCity] = useState("");
   const [error, setError] = useState("");
+  const [toast, setToast] = useState(""); // holds toast message
+
+
+  // Run once during app load
+  let deviceId = localStorage.getItem("device_id");
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("device_id", deviceId);
+  }
+
+  const showToast = (message, duration = 2000) => {
+    setToast(message);
+    setTimeout(() => setToast(""), duration); // auto-hide after `duration` ms
+  };
+
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -77,44 +92,62 @@ function YoloTest() {
       fetchLocation();
     }, []);
 
-  const captureAndDetect = async () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!video || !canvas) return;
+    const captureAndDetect = async () => {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      if (!video || !canvas) return;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    setStreaming(false);
+      // Capture frame
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      setStreaming(false);
 
-    const frame = canvas.toDataURL("image/jpeg");
-    try {
-      const res = await fetch("http://127.0.0.1:8000/api/detect/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: frame })
-      });
-      const data = await res.json();
-      console.log("Detections:", data);
-
-      if (data.detections) {
-        data.detections.forEach(d => {
-          const [x1, y1, x2, y2] = d.bbox;
-          ctx.strokeStyle = "red";
-          ctx.lineWidth = 3;
-          ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-
-          ctx.fillStyle = "red";
-          ctx.font = `${Math.max(14, canvas.width / 50)}px Arial`;
-          const text = `${d.class} (${(d.confidence * 100).toFixed(1)}%)`;
-          ctx.fillText(text, x1, y1 > 20 ? y1 - 5 : y1 + 20);
+      const frame = canvas.toDataURL("image/jpeg");
+      
+      try {
+        // 🔹 Send image + location + city to backend
+        const res = await fetch("http://127.0.0.1:8000/api/detect/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image: frame,
+            latitude: location?.latitude,
+            longitude: location?.longitude,
+            city: city,
+            username: deviceId
+          }),
         });
+
+        const data = await res.json();
+        console.log("Server response:", data);
+        
+        if (!Array.isArray(data.detections) || data.detections.length === 0) {
+          showToast(data.message || "No pothole detected.");
+        } else {
+          data.detections.forEach((d) => {
+            const [x1, y1, x2, y2] = d.bbox;
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+
+            ctx.fillStyle = "red";
+            ctx.font = `${Math.max(14, canvas.width / 50)}px Arial`;
+            const text = `${d.class} (${(d.confidence * 100).toFixed(1)}%)`;
+            ctx.fillText(text, x1, y1 > 20 ? y1 - 5 : y1 + 20);
+          });
+          showToast("Pothole detected and saved!");
+        }
+
+
+        
+      } catch (err) {
+        console.error("Backend error:", err);
+        showToast("Error during detection. Check console for details.");
       }
-    } catch (err) {
-      console.error("Backend error:", err);
-    }
-  };
+    };
+
 
   const resetCamera = () => {
     setStreaming(true);
@@ -169,6 +202,12 @@ function YoloTest() {
       >
         {streaming ? "Capture Image" : "Resume Camera"}
       </button>
+      {toast && (
+        <div className="toast">
+          {toast}
+        </div>
+      )}
+
     </div>
 
   );

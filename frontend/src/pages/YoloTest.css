@@ -65,3 +65,27 @@
   color: #ff6b6b;
   font-weight: bold;
 }
+
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 136, 53, 0.9);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  z-index: 1000;
+  animation: fadein 0.3s, fadeout 0.3s 2.7s;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes fadeout {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
