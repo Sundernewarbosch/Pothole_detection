@@ -4,7 +4,7 @@ from django.utils.html import format_html
 
 @admin.register(PotholeDetection)
 class PotholeDetectionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'city', 'latitude', 'longitude', 'detected_at', 'image_preview')
+    list_display = ('id', 'deviceId', 'city', 'latitude', 'longitude', 'detected_at', 'image_preview')
     search_fields = ("user__username",)
     list_filter = ("detected_at",)
     readonly_fields = ('image_preview', 'detected_at')

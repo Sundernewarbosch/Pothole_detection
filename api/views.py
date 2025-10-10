@@ -5,6 +5,7 @@ from ultralytics import YOLO
 from django.core.files.base import ContentFile
 from .models import PotholeDetection
 from django.contrib.auth.models import User
+from .serializers import PotholeDetectionSerializer
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "api/models/best.pt")
@@ -17,7 +18,7 @@ def detect(request):
         img_data = request.data.get("image")
         latitude = request.data.get("latitude")
         longitude = request.data.get("longitude")
-        username = request.data.get("username")
+        deviceId = request.data.get("deviceId")
         city = request.data.get("city")
 
         if not img_data:
@@ -51,14 +52,10 @@ def detect(request):
         # Get detection with max confidence
         best_detection = max(detections, key=lambda d: d["confidence"])
 
-        # Save to DB
-        user = None
-        if username:
-            user, _ = User.objects.get_or_create(username=username)
 
         image_file = ContentFile(img_bytes, name="pothole.jpg")
         PotholeDetection.objects.create(
-            user=user,
+            deviceId=deviceId,
             latitude=latitude,
             longitude=longitude,
             city=city or "",
@@ -71,5 +68,46 @@ def detect(request):
             "message": "Pothole detected and saved!"
         }, status=201)
 
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
+
+@api_view(['GET'])
+def share_pothole(request, id):
+    try:
+        pothole = PotholeDetection.objects.get(id=id)
+
+        text_description = (
+            f"Pothole detected in {pothole.city or 'and unknown area'}"
+            f"on {pothole.detected_at.strftime('%Y-%m-%d')}."
+        )
+
+        context = {
+            "pothole_id" : pothole.id,
+            "image_url": request.build_absolute_uri(pothole.image.url),
+            "description": text_description,
+            "latitude" : pothole.latitude,
+            "longitude": pothole.longitude,
+            "city": pothole.city,
+            "detected_at" : pothole.detected_at.strftime('%Y-%m-%d'),
+            "share_url": request.build_absolute_uri(),
+        }
+        return Response(context, status=200)
+    
+    except PotholeDetection.DoesNotExist:
+        return Response({"error": "Pothole not found"}, status=404)
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
+    
+@api_view(['GET'])
+def get_pothole(request, deviceId):
+    try:
+        pothole = PotholeDetection.objects.filter(deviceId=deviceId).order_by('-detected_at').first()
+
+        if not pothole:
+            return Response({"message":"Invalid device id"}, status=400)
+        
+        serializer = PotholeDetectionSerializer(pothole)
+        return Response(serializer.data, status=200)
+    
     except Exception as e:
         return Response({"error": str(e)}, status=400)

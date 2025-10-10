@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import "./YoloTest.css";
+import { API_BASE_URL, BASE_URL } from "../config";
 
 function YoloTest() {
   const videoRef = useRef(null);
@@ -39,7 +40,12 @@ function YoloTest() {
           video.srcObject.getTracks().forEach((track) => track.stop());
         }
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30 },
+          },
         });
         video.srcObject = stream;
         await new Promise((resolve) => {
@@ -132,13 +138,12 @@ function YoloTest() {
     }
 
     setStreaming(false);
-    setShowShare(true);
 
     const frame = canvas.toDataURL("image/jpeg");
 
     try {
       // 🔹 Send image + location + city to backend
-      const res = await fetch("http://127.0.0.1:8000/api/detect/", {
+      const res = await fetch(`${API_BASE_URL}/detect/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -146,7 +151,7 @@ function YoloTest() {
           latitude: location?.latitude,
           longitude: location?.longitude,
           city: city,
-          username: deviceId,
+          deviceId: deviceId,
         }),
       });
 
@@ -156,6 +161,7 @@ function YoloTest() {
       if (!Array.isArray(data.detections) || data.detections.length === 0) {
         showToast(data.message || "No pothole detected.");
       } else {
+        setShowShare(true);
         data.detections.forEach((d) => {
           const [x1, y1, x2, y2] = d.bbox;
           ctx.strokeStyle = "red";
@@ -186,39 +192,39 @@ function YoloTest() {
   };
 
   const shareDetection = async () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    try {
+      // 🔹 Send image + location + city to backend
+      const res = await fetch(`${API_BASE_URL}/latest/${deviceId}/`);
+      if (!res.ok) throw new Error("Failed to fetch latest pothole");
 
-    canvas.toBlob(async (blob) => {
-      if (
-        !navigator.canShare ||
-        !navigator.canShare({
-          files: [new File([blob], "pothole.jpg", { type: blob.type })],
-        })
-      ) {
-        alert("Sharing not supported on this device/browser");
-        return;
+      const data = await res.json();
+      const potholeId = data.id;
+      const shareUrl = BASE_URL + `/share/${potholeId}`;
+      const shareText = `Look what I spotted on the road! 🕵️‍♂️ A pothole in ${data.city}. Let’s keep our streets safe—see it here: ${shareUrl}`;
+
+      // Check if the browser supports Web Share API
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "Pothole Detection",
+            text: shareText,
+          });
+          console.log("Share successful!");
+        } catch (err) {
+          console.error("Share failed:", err);
+        }
+      } else {
+        // Fallback: copy link to clipboard
+        try {
+          await navigator.clipboard.writeText(shareText);
+          alert("Share URL copied to clipboard: " + shareText);
+        } catch (err) {
+          console.error("Failed to copy share URL:", err);
+        }
       }
-
-      const message = prompt(
-        "Enter a message to share with your detection:",
-        "Check out this pothole I found!"
-      );
-      const inviteLink = "https://yourapp.com/invite";
-
-      const file = new File([blob], "pothole.jpg", { type: blob.type });
-
-      try {
-        await navigator.share({
-          files: [file],
-          title: "Pothole Detection",
-          text: `${message}\nJoin me here: ${inviteLink}`,
-        });
-        console.log("Shared successfully");
-      } catch (err) {
-        console.error("Error sharing:", err);
-      }
-    }, "image/jpeg");
+    } catch (err) {
+      console.error("Backend error:", err);
+    }
   };
 
   return (
