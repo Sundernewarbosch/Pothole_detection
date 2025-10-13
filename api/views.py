@@ -74,8 +74,8 @@ def detect(request):
 @api_view(['GET'])
 def share_pothole(request, id):
     try:
-        pothole = PotholeDetection.objects.get(id=id)
-
+        pothole = PotholeDetection.objects.get(share_uuid=id)
+        
         text_description = (
             f"Pothole detected in {pothole.city or 'and unknown area'}"
             f"on {pothole.detected_at.strftime('%Y-%m-%d')}."
@@ -89,7 +89,7 @@ def share_pothole(request, id):
             "longitude": pothole.longitude,
             "city": pothole.city,
             "detected_at" : pothole.detected_at.strftime('%Y-%m-%d'),
-            "share_url": request.build_absolute_uri(),
+            "share_uuid": pothole.share_uuid,
         }
         return Response(context, status=200)
     
@@ -99,7 +99,7 @@ def share_pothole(request, id):
         return Response({"error": str(e)}, status=400)
     
 @api_view(['GET'])
-def get_pothole(request, deviceId):
+def get_latest_pothole(request, deviceId):
     try:
         pothole = PotholeDetection.objects.filter(deviceId=deviceId).order_by('-detected_at').first()
 
@@ -111,3 +111,9 @@ def get_pothole(request, deviceId):
     
     except Exception as e:
         return Response({"error": str(e)}, status=400)
+    
+
+@api_view(['GET'])
+def get_all_potholes(request):
+    potholes = PotholeDetection.objects.values('latitude', 'longitude')
+    return Response(list(potholes))

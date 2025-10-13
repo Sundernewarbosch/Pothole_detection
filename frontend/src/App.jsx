@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import YoloTest from "./pages/YoloTest";
 import SharePage from "./pages/SharePage";
+import HeatMapView from "./pages/HeatMapView";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/yolo" element={<YoloTest />} />
+        <Route path="/heatmap" element={<HeatMapView />} />
         <Route path="share/:id" element={<SharePage />} />
       </Routes>
     </Router>

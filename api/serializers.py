@@ -4,4 +4,4 @@ from .models import PotholeDetection
 class PotholeDetectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PotholeDetection
-        fields = ['id', 'deviceId', 'image', 'latitude', 'longitude', 'city', 'detected_at']
+        fields = ['id', 'share_uuid', 'deviceId', 'image', 'latitude', 'longitude', 'city', 'detected_at']

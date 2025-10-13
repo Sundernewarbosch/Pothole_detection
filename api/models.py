@@ -1,8 +1,10 @@
 from django.db import models
+import uuid
 from django.contrib.auth.models import User
 
 class PotholeDetection(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    share_uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     deviceId = models.CharField(max_length=100, null=True, blank=True)
     image = models.ImageField(upload_to='detections/')
     result = models.JSONField()  # can store confidence, bounding boxes, etc.

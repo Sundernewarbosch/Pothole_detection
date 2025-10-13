@@ -199,7 +199,7 @@ function YoloTest() {
 
       const data = await res.json();
       const potholeId = data.id;
-      const shareUrl = BASE_URL + `/share/${potholeId}`;
+      const shareUrl = BASE_URL + `/share/${data.share_uuid}`;
       const shareText = `Look what I spotted on the road! 🕵️‍♂️ A pothole in ${data.city}. Let’s keep our streets safe—see it here: ${shareUrl}`;
 
       // Check if the browser supports Web Share API
