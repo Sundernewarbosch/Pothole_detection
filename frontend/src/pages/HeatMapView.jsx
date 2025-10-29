@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
+import { API_BASE_URL, BASE_URL } from "../config";
 
 export default function HeatMapView() {
   const mapRef = useRef(null); // store the map instance
@@ -21,7 +22,7 @@ export default function HeatMapView() {
     }
 
     // Fetch pothole data from backend
-    fetch("http://127.0.0.1:8000/api/potholes/")
+    fetch(`${API_BASE_URL}/potholes/`)
       .then((res) => res.json())
       .then((data) => {
         console.log("pothole data:", data);
