@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import "./YoloTest.css";
 import { API_BASE_URL, BASE_URL } from "../config";
+import heartAnimation from "../assets/Heart fav.json";
+import Lottie from "lottie-react";
 
 function YoloTest() {
   const videoRef = useRef(null);
@@ -12,6 +14,7 @@ function YoloTest() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const [showShare, setShowShare] = useState(false);
+  const [play, setPlay] = useState(false);
 
   // Run once during app load
   function generateUUID() {
@@ -73,42 +76,39 @@ function YoloTest() {
     setupCamera();
   }, []);
 
-  useEffect(() => {
-    async function fetchLocation() {
-      if (!("geolocation" in navigator)) {
-        setError("Geolocation is not supported by your browser.");
-        return;
-      }
-
-      try {
-        const getPosition = () =>
-          new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-          });
-
-        const position = await getPosition();
-        const { latitude, longitude } = position.coords;
-        setLocation({ latitude, longitude });
-
-        // Fetch city name using reverse geocoding (OpenStreetMap API)
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-        );
-        const data = await response.json();
-        const cityName =
-          data.address.city ||
-          data.address.town ||
-          data.address.village ||
-          data.address.county ||
-          "Unknown location";
-        setCity(cityName);
-      } catch (err) {
-        setError("Permission denied or unable to fetch location.");
-      }
+  async function fetchLocation() {
+    if (!("geolocation" in navigator)) {
+      setError("Geolocation is not supported by your browser.");
+      return;
     }
 
-    fetchLocation();
-  }, []);
+    try {
+      const getPosition = () =>
+        new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+
+      const position = await getPosition();
+      const { latitude, longitude } = position.coords;
+      setLocation({ latitude, longitude });
+
+      // Fetch city name using reverse geocoding (OpenStreetMap API)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+      );
+      const data = await response.json();
+      const cityName =
+        data.address.city ||
+        data.address.town ||
+        data.address.village ||
+        data.address.county ||
+        "Unknown location";
+      setCity(cityName);
+    } catch (err) {
+      setError("Permission denied or unable to fetch location.");
+    }
+  }
+  fetchLocation();
 
   const captureAndDetect = async () => {
     const video = videoRef.current;
@@ -116,6 +116,7 @@ function YoloTest() {
     const ctx = canvas.getContext("2d");
     if (!video || !canvas) return;
 
+    fetchLocation();
     // Capture frame
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -255,9 +256,19 @@ function YoloTest() {
         <canvas
           ref={canvasRef}
           className="yolo-canvas"
+          onClick={() => {
+            setPlay(true);
+            setTimeout(() => setPlay(false), 1000); // reset
+          }}
           style={{ display: streaming ? "none" : "block" }}
         />
-
+        {play && showShare && (
+          <Lottie
+            animationData={heartAnimation}
+            loop={false}
+            className="heart-anim"
+          />
+        )}
         {/* 🔹 Share button overlay */}
         {showShare && (
           <button onClick={shareDetection} className="share-button">
