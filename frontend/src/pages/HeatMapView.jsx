@@ -26,9 +26,20 @@ export default function HeatMapView() {
       .then((res) => res.json())
       .then((data) => {
         console.log("pothole data:", data);
-        const heatData = data.map((d) => [d.latitude, d.longitude]);
 
-        // If heat layer exists, remove it first
+        // Filter valid coordinates only
+        const heatData = data
+          .filter(
+            (d) =>
+              d.latitude !== null &&
+              d.longitude !== null &&
+              !isNaN(d.latitude) &&
+              !isNaN(d.longitude)
+          )
+          .map((d) => [parseFloat(d.latitude), parseFloat(d.longitude)]);
+
+        console.log("Valid heatmap points:", heatData.length);
+
         if (heatLayerRef.current) {
           mapRef.current.removeLayer(heatLayerRef.current);
         }
@@ -45,7 +56,7 @@ export default function HeatMapView() {
       id="heatmap"
       style={{
         height: "700px",
-        width: "70vw",
+        width: "100%",
       }}
     ></div>
   );

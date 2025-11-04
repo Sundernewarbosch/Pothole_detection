@@ -1,0 +1,136 @@
+/* 🌟 General layout */
+.leaderboard-container {
+  max-width: 1200px;
+  width: 80%;
+  margin: 2rem auto;
+  padding: 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  font-family: "Inter", sans-serif;
+  transition: all 0.3s ease;
+}
+
+/* 🌟 Title */
+.leaderboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1f2937;
+}
+
+.leaderboard-icon {
+  color: #facc15; /* yellow-500 */
+  height: 1.8rem;
+  width: 1.8rem;
+}
+
+/* 🌟 Loading and empty states */
+.leaderboard-loading,
+.leaderboard-empty {
+  text-align: center;
+  color: #6b7280; /* gray-500 */
+  font-size: 1rem;
+  margin-top: 2rem;
+}
+
+/* 🌟 List items */
+.leaderboard-list {
+  border-top: 1px solid #e5e7eb;
+  width: 100%;
+}
+
+.leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.leaderboard-item:hover {
+  background: #f9fafb;
+}
+
+/* 🏆 Top 3 colors */
+.leaderboard-item.first {
+  background-color: #fef9c3; /* light yellow */
+}
+.leaderboard-item.second {
+  background-color: #f3f4f6; /* light gray */
+}
+.leaderboard-item.third {
+  background-color: #fffbeb; /* light amber */
+}
+
+/* 🌟 User info */
+.leaderboard-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  color: #1f2937; /* gray-800 */
+}
+
+.rank {
+  width: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.username {
+  font-size: 1rem;
+}
+
+.post-count {
+  color: #4b5563; /* gray-700 */
+  font-size: 0.9rem;
+}
+
+/* 🏅 Medal colors */
+.medal {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.gold {
+  color: #facc15;
+}
+
+.silver {
+  color: #9ca3af;
+}
+
+.bronze {
+  color: #f59e0b;
+}
+
+/* 📱 Responsive Design */
+@media (max-width: 640px) {
+  .leaderboard-container {
+    padding: 1.25rem 1.5rem;
+    margin: 1rem auto;
+  }
+
+  .leaderboard-title {
+    font-size: 1.5rem;
+  }
+
+  .leaderboard-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .post-count {
+    align-self: flex-end;
+    font-size: 0.85rem;
+  }
+}

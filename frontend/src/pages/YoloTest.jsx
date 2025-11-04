@@ -108,7 +108,9 @@ function YoloTest() {
       setError("Permission denied or unable to fetch location.");
     }
   }
-  fetchLocation();
+  useEffect(() => {
+    fetchLocation();
+  }, []);
 
   const captureAndDetect = async () => {
     const video = videoRef.current;
@@ -256,7 +258,7 @@ function YoloTest() {
         <canvas
           ref={canvasRef}
           className="yolo-canvas"
-          onClick={() => {
+          onDoubleClick={() => {
             setPlay(true);
             setTimeout(() => setPlay(false), 1000); // reset
           }}

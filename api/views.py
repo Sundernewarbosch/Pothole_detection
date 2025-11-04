@@ -6,6 +6,7 @@ from django.core.files.base import ContentFile
 from .models import PotholeDetection
 from django.contrib.auth.models import User
 from .serializers import PotholeDetectionSerializer
+from django.db.models import Count, F, Case, When, CharField
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "api/models/best.pt")
@@ -117,3 +118,48 @@ def get_latest_pothole(request, deviceId):
 def get_all_potholes(request):
     potholes = PotholeDetection.objects.values('latitude', 'longitude')
     return Response(list(potholes))
+
+
+@api_view(["GET"])
+def leaderboard(request):
+    # Aggregate detections by user/device
+    detections = (
+        PotholeDetection.objects
+        .annotate(
+            display_name=Case(
+                When(user__isnull=False, then=F("user__username")),
+                default=F("deviceId"),
+                output_field=CharField(),
+            )
+        )
+        .values("display_name", "user")
+        .annotate(post_count=Count("id"))
+        .order_by("-post_count")
+    )
+
+    # Create friendly aliases for anonymous users (device-only)
+    anon_counter = 1
+    anon_map = {}
+    data = []
+
+    for d in detections:
+        if d["user"] is None:
+            # Anonymous device — assign unique name
+            device_id = d["display_name"]
+            if device_id not in anon_map:
+                anon_map[device_id] = f"User{anon_counter}"
+                anon_counter += 1
+            username = anon_map[device_id]
+        else:
+            # Logged-in user — use actual username
+            username = d["display_name"]
+
+        data.append({
+            "username": username,
+            "post_count": d["post_count"],
+        })
+
+    # Limit to top 10
+    data = sorted(data, key=lambda x: x["post_count"], reverse=True)[:10]
+
+    return Response(data)

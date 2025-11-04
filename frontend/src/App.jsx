@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import YoloTest from "./pages/YoloTest";
 import SharePage from "./pages/SharePage";
 import HeatMapView from "./pages/HeatMapView";
+import Leaderboard from "./pages/Leaderboard";
 
 function App() {
   return (
@@ -14,6 +15,9 @@ function App() {
         <Link to="/yolo" style={{ margin: "0 10px" }}>
           YOLO Test
         </Link>
+        <Link to="/leaderboard" style={{ margin: "0 10px" }}>
+          Leaderboard
+        </Link>
       </nav>
 
       <Routes>
@@ -21,6 +25,7 @@ function App() {
         <Route path="/yolo" element={<YoloTest />} />
         <Route path="/heatmap" element={<HeatMapView />} />
         <Route path="share/:id" element={<SharePage />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </Router>
   );
