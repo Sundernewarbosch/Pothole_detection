@@ -1,0 +1,122 @@
+/* ===========================
+   🌐 NavBar.css
+   =========================== */
+
+.navbar {
+  width: 100%;
+  background: var(--card, #ffffff);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nav-container {
+  /* max-width: 1100px; */
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 🔹 Logo Section */
+.nav-logo {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--accent-1, #ff4d4f);
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+/* 🔹 Link Container */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* 🔹 Links */
+.nav-link {
+  position: relative;
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--text, #222);
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--accent-1, #ff4d4f);
+}
+
+/* Active underline animation */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent-1, #ff4d4f);
+  transition: width 0.25s ease;
+  border-radius: 2px;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+/* 🔹 Dark theme overrides */
+:root[data-theme="dark"] .navbar {
+  background: var(--card, #111822);
+  border-bottom: 1px solid var(--border, #1f2937);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme="dark"] .nav-link {
+  color: var(--text, #e5e7eb);
+}
+
+:root[data-theme="dark"] .nav-link:hover {
+  color: var(--accent-1, #ff6b6b);
+}
+
+/* 🔹 Responsive Navigation */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 6px;
+  }
+
+  .nav-logo {
+    margin-bottom: 6px;
+  }
+}
+
+/* 🔹 Subtle entry animation */
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navbar {
+  animation: fadeSlideDown 0.4s ease;
+}

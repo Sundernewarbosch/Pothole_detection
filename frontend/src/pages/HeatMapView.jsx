@@ -56,8 +56,28 @@ export default function HeatMapView() {
       id="heatmap"
       style={{
         height: "700px",
-        width: "100%",
+        width: "90%",
+        backgroundColor: "#fafafa",
+        borderRadius: "12px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        border: "1px solid #e0e0e0",
+        overflow: "hidden",
+        position: "relative",
+        margin: "10px auto",
       }}
-    ></div>
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: "16px",
+          left: "24px",
+          fontWeight: "600",
+          fontSize: "1.1rem",
+          color: "#333",
+        }}
+      >
+        Heatmap Visualization
+      </div>
+    </div>
   );
 }

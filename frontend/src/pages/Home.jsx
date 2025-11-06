@@ -5,7 +5,9 @@ function Home() {
   return (
     <div className="home-container">
       <h1>Home Page</h1>
-      <p>Click “YOLO Test” in the nav to go to test route.</p>
+      <p>
+        Click "Detect Potholes" in the nav to go to the Pothole Detection page.
+      </p>
     </div>
   );
 }
