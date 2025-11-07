@@ -112,6 +112,19 @@
   color: #f59e0b;
 }
 
+.leaderboard-item.highlight {
+  background-color: rgba(255, 215, 0, 0.15);
+  border: 2px solid gold;
+  border-radius: 10px;
+  transform: scale(1.02);
+  transition: all 0.2s ease-in-out;
+}
+
+.leaderboard-item.highlight .username {
+  font-weight: 700;
+  color: gold;
+}
+
 /* 📱 Responsive Design */
 @media (max-width: 640px) {
   .leaderboard-container {

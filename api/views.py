@@ -120,6 +120,9 @@ def get_all_potholes(request):
     return Response(list(potholes))
 
 
+
+
+
 @api_view(["GET"])
 def leaderboard(request):
     # Aggregate detections by user/device
@@ -132,7 +135,7 @@ def leaderboard(request):
                 output_field=CharField(),
             )
         )
-        .values("display_name", "user")
+        .values("display_name", "user", "deviceId")
         .annotate(post_count=Count("id"))
         .order_by("-post_count")
     )
@@ -144,8 +147,8 @@ def leaderboard(request):
 
     for d in detections:
         if d["user"] is None:
-            # Anonymous device — assign unique name
-            device_id = d["display_name"]
+            # Anonymous device — assign unique alias
+            device_id = d["deviceId"]
             if device_id not in anon_map:
                 anon_map[device_id] = f"User{anon_counter}"
                 anon_counter += 1
@@ -156,10 +159,11 @@ def leaderboard(request):
 
         data.append({
             "username": username,
+            "deviceId": d["deviceId"],  
             "post_count": d["post_count"],
         })
 
     # Limit to top 10
-    data = sorted(data, key=lambda x: x["post_count"], reverse=True)[:10]
+    data = sorted(data, key=lambda x: x["post_count"], reverse=True)
 
     return Response(data)
