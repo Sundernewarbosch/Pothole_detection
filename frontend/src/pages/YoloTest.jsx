@@ -14,6 +14,7 @@ function YoloTest() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const [showShare, setShowShare] = useState(false);
+  const [highlight, setHighlight] = useState(false);
   const [play, setPlay] = useState(false);
 
   // Run once during app load
@@ -242,6 +243,14 @@ function YoloTest() {
     }
   };
 
+  useEffect(() => {
+    if (showShare) {
+      setHighlight(true);
+      const timer = setTimeout(() => setHighlight(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [showShare]);
+
   return (
     <div className="yolo-container">
       <h1>Pothole Detection</h1>
@@ -273,7 +282,10 @@ function YoloTest() {
         )}
         {/* 🔹 Share button overlay */}
         {showShare && (
-          <button onClick={shareDetection} className="share-button">
+          <button
+            onClick={shareDetection}
+            className={`share-button ${highlight ? "highlight" : ""}`}
+          >
             <img
               src="/share.png"
               alt="Share"

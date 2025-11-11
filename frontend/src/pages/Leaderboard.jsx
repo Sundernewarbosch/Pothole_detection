@@ -14,7 +14,7 @@ function Leaderboard() {
         const res = await fetch(`${API_BASE_URL}/leaderboard/`);
         const data = await res.json();
 
-        // Replace this with your actual device ID retrieval
+        // ✅ Get device ID
         const storedDevice = localStorage.getItem("device_id");
         setCurrentUser(storedDevice);
 
@@ -33,17 +33,43 @@ function Leaderboard() {
   if (leaders.length === 0)
     return <p className="leaderboard-empty">No submissions yet.</p>;
 
-  // Find user index using deviceId instead of username ✅
+  // ✅ Find user's entry using deviceId
+  const userEntry = leaders.find((u) => u.deviceId === currentUser);
   const userIndex = leaders.findIndex((u) => u.deviceId === currentUser);
 
-  // Compute visible leaders (max 5)
+  // ✅ If user hasn’t submitted anything, show CTA message
+  if (!userEntry) {
+    return (
+      <div className="leaderboard-container">
+        <h1 className="leaderboard-title">
+          <Crown className="leaderboard-icon" />
+          Leaderboard
+        </h1>
+        <p className="leaderboard-empty" style={{ marginTop: "20px" }}>
+          You haven’t submitted any potholes yet.{" "}
+          <a
+            href="/potholevision"
+            style={{
+              color: "#007bff",
+              textDecoration: "none",
+              fontWeight: "600",
+            }}
+          >
+            Start submitting now →
+          </a>
+        </p>
+      </div>
+    );
+  }
+
+  // ✅ Compute visible leaders (max 5)
   let visibleLeaders = [];
   if (userIndex === -1 || userIndex < 5) {
     visibleLeaders = leaders.slice(0, 5);
   } else {
     visibleLeaders = [
       ...leaders.slice(0, 4),
-      leaders[userIndex], // Show the user at 5th
+      leaders[userIndex], // Show the user as 5th
     ];
   }
 
@@ -56,10 +82,8 @@ function Leaderboard() {
 
       <div className="leaderboard-list">
         {visibleLeaders.map((user, index) => {
-          // Calculate correct global rank
           const globalRank =
             userIndex >= 5 && index === 4 ? userIndex + 1 : index + 1;
-
           const isCurrentUser = user.deviceId === currentUser;
 
           return (

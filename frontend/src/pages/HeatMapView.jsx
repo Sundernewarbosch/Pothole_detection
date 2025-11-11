@@ -1,33 +1,61 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
-import { API_BASE_URL, BASE_URL } from "../config";
+import { API_BASE_URL } from "../config";
 
 export default function HeatMapView() {
-  const mapRef = useRef(null); // store the map instance
-  const heatLayerRef = useRef(null); // store heat layer
+  const mapRef = useRef(null);
+  const heatLayerRef = useRef(null);
+  const [userLocation, setUserLocation] = useState(null);
 
+  // Step 1: Get user location
   useEffect(() => {
-    // Only initialize the map if it doesn't exist
-    if (!mapRef.current) {
-      mapRef.current = L.map("heatmap").setView(
-        [20.994817780218884, 78.46284180718987],
-        4.5
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([latitude, longitude]);
+        },
+        (error) => {
+          console.warn("Geolocation error:", error);
+          setUserLocation([20.994817780218884, 78.46284180718987]); // fallback center (India)
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
       );
+    } else {
+      console.warn("Geolocation not supported.");
+      setUserLocation([20.994817780218884, 78.46284180718987]);
+    }
+  }, []);
+
+  // Step 2: Initialize map + load data
+  useEffect(() => {
+    if (!userLocation) return;
+
+    // Approx. zoom level to cover ~5 km radius = around level 13
+    const zoomLevel = 13;
+
+    if (!mapRef.current) {
+      mapRef.current = L.map("heatmap").setView(userLocation, zoomLevel);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",
       }).addTo(mapRef.current);
+
+      // Add marker for user's position
+      L.marker(userLocation)
+        .addTo(mapRef.current)
+        .bindPopup("You are here")
+        .openPopup();
+    } else {
+      mapRef.current.setView(userLocation, zoomLevel);
     }
 
     // Fetch pothole data from backend
     fetch(`${API_BASE_URL}/potholes/`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("pothole data:", data);
-
-        // Filter valid coordinates only
         const heatData = data
           .filter(
             (d) =>
@@ -38,8 +66,6 @@ export default function HeatMapView() {
           )
           .map((d) => [parseFloat(d.latitude), parseFloat(d.longitude)]);
 
-        console.log("Valid heatmap points:", heatData.length);
-
         if (heatLayerRef.current) {
           mapRef.current.removeLayer(heatLayerRef.current);
         }
@@ -49,7 +75,7 @@ export default function HeatMapView() {
         );
       })
       .catch((err) => console.error("API error:", err));
-  }, []); // empty dependency array ensures this runs only once
+  }, [userLocation]);
 
   return (
     <div
@@ -74,6 +100,7 @@ export default function HeatMapView() {
           fontWeight: "600",
           fontSize: "1.1rem",
           color: "#333",
+          zIndex: 1000,
         }}
       >
         Heatmap Visualization
