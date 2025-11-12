@@ -1,17 +1,214 @@
-/* Home.css */
 .home-container {
-  text-align: center;
-  margin-top: 50px;
-  font-family: Arial, sans-serif;
-  color: #494949;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #eef4ff, #dbeafe);
+  padding: 60px 80px;
+  color: #1e293b;
+  box-sizing: border-box;
 }
 
+/* Inner content card */
+.home-container > div {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  /* max-width: 1200px; */
+  width: 100%;
+}
+
+/* Headings */
 .home-container h1 {
   font-size: 2.5rem;
-  margin-bottom: 20px;
+  font-weight: 800;
+  color: #ff4d4f;
+  margin-bottom: 16px;
 }
 
+.home-container h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #b33638;
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+
+/* Paragraphs */
 .home-container p {
+  font-size: 1.05rem;
+  color: #475569;
+  max-width: 800px;
+  line-height: 1.6;
+}
+
+/* Feature grid */
+.home-container .feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.home-container .feature-card {
+  background: #fff2f2;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.home-container .feature-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.home-container .feature-card h3 {
   font-size: 1.2rem;
-  color: #666;
+  font-weight: 600;
+  color: #b33638;
+  margin-bottom: 8px;
+}
+
+/* Goal section */
+.home-container .goal-section {
+  background: linear-gradient(to right, #ff4d4f, #b33638);
+  color: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin: 30px 0;
+  max-width: 900px;
+}
+.home-container .goal-section p {
+  color: white;
+}
+.home-container .goal-section h2 {
+  color: white;
+  margin-bottom: 10px;
+}
+
+/* List styling */
+.home-container ol {
+  padding-left: 20px;
+  margin: 20px 0;
+  max-width: 700px;
+}
+
+.home-container ol li {
+  margin-bottom: 8px;
+  color: #334155;
+}
+
+/* Button */
+.home-container button {
+  background: #ff4d4f;
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.2s ease;
+}
+
+.home-container button:hover {
+  background: #b33638;
+}
+
+/* Footer text */
+.home-container .footer-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-top: 30px;
+}
+
+/* ------------------------------ */
+/* ✅ RESPONSIVE STYLES */
+/* ------------------------------ */
+
+/* Tablets (≤ 1024px) */
+@media (max-width: 1024px) {
+  .home-container {
+    padding: 50px 60px;
+  }
+
+  .home-container > div {
+    padding: 32px;
+  }
+
+  .home-container h1 {
+    font-size: 2.2rem;
+  }
+
+  .home-container h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Medium devices (≤ 768px) */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 40px 30px;
+  }
+
+  .home-container > div {
+    padding: 24px;
+  }
+
+  .home-container h1 {
+    font-size: 2rem;
+  }
+
+  .home-container p {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+
+  .home-container .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-container .goal-section {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .home-container button {
+    width: 100%;
+    font-size: 1rem;
+    padding: 14px 0;
+  }
+}
+
+/* Small devices (≤ 480px) */
+@media (max-width: 480px) {
+  .home-container {
+    padding: 24px;
+  }
+
+  .home-container > div {
+    padding: 20px;
+  }
+
+  .home-container h1 {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+  }
+
+  .home-container h2 {
+    font-size: 1.2rem;
+  }
+
+  .home-container p,
+  .home-container li {
+    font-size: 0.95rem;
+  }
+
+  .home-container button {
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
 }

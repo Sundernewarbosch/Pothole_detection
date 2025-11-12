@@ -36,7 +36,15 @@
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: flex-end;
+  gap: 20px;
+  flex-wrap: nowrap; /* ✅ don't allow wrapping */
+  flex-shrink: 1;
+  overflow-x: auto; /* ✅ allows horizontal scroll if too tight */
+  scrollbar-width: none; /* hide scrollbar on Firefox */
+}
+.nav-links::-webkit-scrollbar {
+  display: none; /* hide scrollbar on Chrome */
 }
 
 /* 🔹 Links */
@@ -46,6 +54,7 @@
   font-weight: 500;
   color: var(--text, #222);
   transition: color 0.2s ease;
+  text-align: center;
 }
 
 .nav-link:hover {
@@ -94,7 +103,7 @@
   }
 
   .nav-links {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     gap: 16px;
     margin-top: 6px;

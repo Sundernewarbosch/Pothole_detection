@@ -1,12 +1,14 @@
 /* YoloTest.css */
 
+/* ----------- General Layout ----------- */
 .yolo-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* margin-top: 20px; */
+  justify-content: flex-start;
   width: 100%;
-  min-height: 10vh;
+  min-height: 90dvh;
+  box-sizing: border-box;
 }
 
 .yolo-container h1 {
@@ -22,47 +24,29 @@
   max-width: 800px;
   aspect-ratio: 16/9;
 }
-.heart-anim {
-  position: absolute;
-  top: -100px;
-  right: 10px;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 @media (max-width: 768px) {
   .yolo-wrapper {
     width: 90%;
     aspect-ratio: 9/14;
   }
-  .heart-anim {
-    position: absolute;
-    top: 100px;
-    right: 10px;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 }
 
+/* ----------- Video & Canvas ----------- */
 .yolo-video,
 .yolo-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   object-fit: cover;
+  z-index: 1;
 }
 
+/* ----------- Capture / Resume Button ----------- */
 .yolo-button {
   margin-top: 15px;
   padding: 12px 25px;
@@ -72,60 +56,93 @@
   background-color: #ff4d4f;
   color: white;
   cursor: pointer;
+  transition: background 0.3s ease;
 }
 
-.location-overlay {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  line-height: 1.4;
-  max-width: 200px;
+.yolo-button:hover {
+  background-color: #ff6a6d;
 }
 
-.error-text {
-  color: #ff6b6b;
-  font-weight: bold;
-}
-
+/* ----------- Toast Notifications ----------- */
 .toast {
   position: fixed;
-  bottom: 30px;
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(30, 136, 53, 0.9);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: bold;
+  background: #ffffff;
+  color: #333;
+  padding: 16px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  animation: fadein 0.3s, fadeout 0.3s 2.7s;
+  width: 320px;
+  max-width: 90%;
+  animation: fadeInUp 0.3s ease, fadeOut 0.4s ease 2.6s forwards;
+  font-family: "Inter", sans-serif;
+  overflow: hidden;
 }
 
-@keyframes fadein {
+.success-toast {
+  border-left: 5px solid #28a745;
+}
+
+.error-toast {
+  border-left: 5px solid #e53935;
+}
+
+.toast-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.toast-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.success-toast .toast-icon {
+  color: #28a745;
+}
+
+.error-toast .toast-icon {
+  color: #e53935;
+}
+
+.toast-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0;
+  color: #222;
+}
+
+.toast-message {
+  font-size: 14px;
+  margin: 4px 0;
+  color: #555;
+}
+
+/* Toast Animations */
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(20px);
+    transform: translate(-50%, 20px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translate(-50%, 0);
   }
 }
 
-@keyframes fadeout {
-  from {
-    opacity: 1;
-  }
+@keyframes fadeOut {
   to {
     opacity: 0;
+    transform: translate(-50%, 10px);
   }
 }
 
+/* ----------- Share Button ----------- */
 .share-button {
   position: absolute;
   top: 10px;
@@ -135,7 +152,7 @@
   padding: 8px;
   border-radius: 5%;
   cursor: pointer;
-  z-index: 10;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,7 +164,6 @@
   transform: scale(1.05);
 }
 
-/* Highlight animation when showShare = true */
 .share-button.highlight {
   animation: pulseGlow 2s ease-in-out;
 }
@@ -165,4 +181,76 @@
     box-shadow: 0 0 0px 0 rgba(0, 150, 255, 0);
     transform: scale(1);
   }
+}
+
+/* ----------- Instruction Overlay ----------- */
+.instruction-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 15;
+  animation: fadeInOverlay 0.5s ease;
+  pointer-events: none;
+}
+
+.double-tap-instruction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff;
+  text-align: center;
+  animation: fadeIn 0.8s ease;
+}
+
+.double-tap-anim {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 10px;
+  filter: brightness(0) invert(1);
+}
+
+.double-tap-text {
+  font-size: 18px;
+  font-weight: 500;
+  color: #fff;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+/* Overlay Animations */
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ----------- Heart Animation ----------- */
+.heart-container {
+  position: absolute;
+  z-index: 30;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* animation: heartPop 1s ease forwards; */
 }
