@@ -11,21 +11,27 @@ export default function HeatMapView() {
 
   // Step 1: Get user location
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
+    if ("geolocation" in navigator) {
+      const watchId = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
+          console.log("User location:", latitude, longitude);
           setUserLocation([latitude, longitude]);
         },
         (error) => {
-          console.warn("Geolocation error:", error);
-          setUserLocation([20.994817780218884, 78.46284180718987]); // fallback center (India)
+          console.error("Geolocation error:", error);
+          alert("Unable to access your location. Enable GPS and refresh.");
         },
-        { enableHighAccuracy: true, timeout: 10000 }
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 0,
+        }
       );
+
+      return () => navigator.geolocation.clearWatch(watchId);
     } else {
-      console.warn("Geolocation not supported.");
-      setUserLocation([20.994817780218884, 78.46284180718987]);
+      alert("Your browser does not support location.");
     }
   }, []);
 
