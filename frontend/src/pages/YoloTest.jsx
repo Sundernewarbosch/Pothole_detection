@@ -114,6 +114,19 @@ function YoloTest() {
     fetchLocation();
   }, []);
 
+  const updateCanvasPosition = () => {
+    const wrapper = document.querySelector(".yolo-wrapper");
+    const canvas = canvasRef.current;
+    if (!wrapper || !canvas) return;
+
+    const rect = wrapper.getBoundingClientRect();
+
+    canvas.style.top = rect.top + "px";
+    canvas.style.left = rect.left + "px";
+    canvas.style.width = rect.width + "px";
+    canvas.style.height = rect.height + "px";
+  };
+
   /* ---------------- Capture + Detect ---------------- */
   const captureAndDetect = async () => {
     if (!localStorage.getItem("seen_double_tap_instruction")) {
@@ -130,8 +143,11 @@ function YoloTest() {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
 
-    const frame = canvas.toDataURL("image/jpeg");
+    // Immediately freeze UI (show canvas)
+    setStreaming(false);
+    updateCanvasPosition();
 
+    const frame = canvas.toDataURL("image/jpeg");
     try {
       const res = await fetch(`${API_BASE_URL}/detect/`, {
         method: "POST",
@@ -146,8 +162,15 @@ function YoloTest() {
       });
 
       const data = await res.json();
-
       if (!data.detections?.length) {
+        if (data.already_exists) {
+          showToast(
+            "A pothole was already reported from this location!",
+            "error"
+          );
+          setStreaming(true);
+          return;
+        }
         showToast("No pothole detected.", "error");
         setStreaming(true); // <-- FIX: ensure overlay is removed
         setDangerVisible(false); // hide danger animation if any was left
@@ -162,12 +185,12 @@ function YoloTest() {
         dangerRef.current?.goToAndPlay(0, true);
 
         // Draw boxes
-        // data.detections.forEach((d) => {
-        //   const [x1, y1, x2, y2] = d.bbox;
-        //   ctx.strokeStyle = "red";
-        //   ctx.lineWidth = 3;
-        //   ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-        // });
+        data.detections.forEach((d) => {
+          const [x1, y1, x2, y2] = d.bbox;
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+        });
         // Convert bounding box → wrapper coordinates for danger animation
         const wrapper = document.querySelector(".yolo-wrapper");
         const wrapperRect = wrapper.getBoundingClientRect();
@@ -187,17 +210,19 @@ function YoloTest() {
           (boxCenterX / canvas.width) * wrapperRect.width + wrapperRect.left;
 
         const screenY =
-          (bottomY / canvas.height) * wrapperRect.height + wrapperRect.top + 20;
+          (bottomY / canvas.height) * wrapperRect.height +
+          wrapperRect.top -
+          100;
         // +20px below the bounding box
 
         if (window.innerWidth < 768) {
           setDangerPos({
             left: screenX,
-            top: screenY - 150,
+            top: screenY,
           });
           setChatBubble({
             left: screenX,
-            top: screenY - 160,
+            top: screenY,
             message: "Thank you for alerting us!!",
           });
         } else {
@@ -206,8 +231,8 @@ function YoloTest() {
             top: screenY,
           });
           setChatBubble({
-            left: screenX - 80,
-            top: screenY - 60,
+            left: screenX,
+            top: screenY,
             message: "Thank you for alerting us!!",
           });
         }
@@ -217,7 +242,16 @@ function YoloTest() {
         //   setChatBubble(null);
         // }, 3000);
 
-        showToast("Great job! Pothole detected!");
+        if (data.already_exists) {
+          showToast(
+            "A pothole was already reported from this location!",
+            "error"
+          );
+          setStreaming(true);
+          return;
+        } else {
+          showToast("Great job! Pothole detected!");
+        }
       }
     } catch (err) {
       showToast("Detection failed.", "error");
@@ -347,7 +381,7 @@ function YoloTest() {
         />
 
         {/* Overlay ABOVE canvas only when not streaming */}
-        {!streaming && (
+        {showShare && (
           <div className="overlay">
             <button onClick={resetCamera} className="close-overlay-btn">
               ✕

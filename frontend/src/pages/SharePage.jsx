@@ -48,8 +48,7 @@ export default function SharePage() {
         </p>
 
         <a
-          href={`https://maps.google.com/?q=${pothole.latitude},${pothole.longitude}`}
-          target="_blank"
+          href={`${BASE_URL}/heatmap?lat=${pothole.latitude}&lng=${pothole.longitude}`}
           rel="noopener noreferrer"
         >
           View on Map

@@ -3,11 +3,20 @@ import L from "leaflet";
 import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
 import { API_BASE_URL } from "../config";
+import { useLocation } from "react-router-dom";
 
 export default function HeatMapView() {
   const mapRef = useRef(null);
   const heatLayerRef = useRef(null);
   const [userLocation, setUserLocation] = useState(null);
+
+  const params = new URLSearchParams(window.location.search);
+  const sharedLat = params.get("lat");
+  const sharedLng = params.get("lng");
+  const sharedLocation =
+    sharedLat && sharedLng
+      ? [parseFloat(sharedLat), parseFloat(sharedLng)]
+      : null;
 
   // Step 1: Get user location
   useEffect(() => {
@@ -37,25 +46,33 @@ export default function HeatMapView() {
 
   // Step 2: Initialize map + load data
   useEffect(() => {
-    if (!userLocation) return;
+    const initialCenter = sharedLocation || userLocation;
+    if (!initialCenter) return;
 
-    // Approx. zoom level to cover ~5 km radius = around level 13
-    const zoomLevel = 13;
+    const zoomLevel = sharedLocation ? 17 : 13; // zoom more for a specific pothole
 
     if (!mapRef.current) {
-      mapRef.current = L.map("heatmap").setView(userLocation, zoomLevel);
+      mapRef.current = L.map("heatmap").setView(initialCenter, zoomLevel);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",
       }).addTo(mapRef.current);
 
-      // Add marker for user's position
-      L.marker(userLocation)
-        .addTo(mapRef.current)
-        .bindPopup("You are here")
-        .openPopup();
+      // Marker for shared coordinate
+      if (sharedLocation) {
+        L.marker(sharedLocation)
+          .addTo(mapRef.current)
+          .bindPopup("Reported pothole here!")
+          .openPopup();
+      }
     } else {
-      mapRef.current.setView(userLocation, zoomLevel);
+      // If userLocation not ready OR we are viewing a shared location, do nothing
+      if (sharedLocation) return;
+
+      // Only move map when userLocation updates normally
+      if (userLocation) {
+        mapRef.current.setView(userLocation, zoomLevel);
+      }
     }
 
     // Fetch pothole data from backend

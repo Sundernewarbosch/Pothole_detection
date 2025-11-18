@@ -7,11 +7,24 @@ from .models import PotholeDetection
 from django.contrib.auth.models import User
 from .serializers import PotholeDetectionSerializer
 from django.db.models import Count, F, Case, When, CharField
+from math import radians, sin, cos, sqrt, atan2
+from django.utils import timezone
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "api/models/best.pt")
 
 model = YOLO(MODEL_PATH)
+
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371000  # Earth radius in meters
+    phi1, phi2 = radians(lat1), radians(lat2)
+    d_phi = radians(lat2 - lat1)
+    d_lambda = radians(lon2 - lon1)
+
+    a = sin(d_phi/2)**2 + cos(phi1) * cos(phi2) * sin(d_lambda/2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    return R * c
 
 @api_view(["POST"])
 def detect(request):
@@ -24,6 +37,32 @@ def detect(request):
 
         if not img_data:
             return Response({"error": "No image provided"}, status=400)
+
+        latitude = float(latitude)
+        longitude = float(longitude)
+
+        # --- DUPLICATE CHECK ---
+        EXIST_THRESHOLD_METERS = 0.5# adjust as needed (5–20m recommended)
+
+        nearby_reports = []
+
+        for p in PotholeDetection.objects.all():
+            if p.latitude and p.longitude:
+                d = haversine(latitude, longitude, float(p.latitude), float(p.longitude))
+                if d <= EXIST_THRESHOLD_METERS:
+                    nearby_reports.append(p)
+
+        if nearby_reports:
+            # Already reported → return flag to frontend
+            return Response({
+                "already_exists": True,
+                "detections": [],
+                "message": "Pothole already reported recently"
+            }, status=200)
+
+        # ---------------------------------------------------
+        # Continue with your existing detection & saving
+        # ---------------------------------------------------
 
         # Decode base64 to OpenCV image
         img_bytes = base64.b64decode(img_data.split(",")[1])
@@ -50,11 +89,11 @@ def detect(request):
                 "message": "No potholes detected"
             }, status=200)
 
-        # Get detection with max confidence
+        # Best detection
         best_detection = max(detections, key=lambda d: d["confidence"])
 
-
         image_file = ContentFile(img_bytes, name="pothole.jpg")
+
         PotholeDetection.objects.create(
             deviceId=deviceId,
             latitude=latitude,
@@ -65,6 +104,7 @@ def detect(request):
         )
 
         return Response({
+            "already_exists": False,
             "detections": [best_detection],
             "message": "Pothole detected and saved!"
         }, status=201)
@@ -72,28 +112,37 @@ def detect(request):
     except Exception as e:
         return Response({"error": str(e)}, status=400)
 
+
 @api_view(['GET'])
 def share_pothole(request, id):
     try:
         pothole = PotholeDetection.objects.get(share_uuid=id)
-        
+
+        # Convert to local timezone (uses settings.TIME_ZONE by default)
+        local_dt = timezone.localtime(pothole.detected_at)
+
+        # Provide both a machine-friendly ISO timestamp and a human-friendly display
+        iso_ts = local_dt.isoformat()
+        display_ts = local_dt.strftime('%Y-%m-%d %H:%M:%S')  # adjust format as needed
+
         text_description = (
-            f"Pothole detected in {pothole.city or 'and unknown area'}"
-            f"on {pothole.detected_at.strftime('%Y-%m-%d')}."
+            f"Pothole detected in {pothole.city or 'an unknown area'} "
+            f"on {display_ts}."
         )
 
         context = {
-            "pothole_id" : pothole.id,
+            "pothole_id": pothole.id,
             "image_url": request.build_absolute_uri(pothole.image.url),
             "description": text_description,
-            "latitude" : pothole.latitude,
+            "latitude": pothole.latitude,
             "longitude": pothole.longitude,
             "city": pothole.city,
-            "detected_at" : pothole.detected_at.strftime('%Y-%m-%d'),
+            "detected_at": iso_ts,          # ISO with timezone offset
+            "detected_at_display": display_ts,  # human readable in local tz
             "share_uuid": pothole.share_uuid,
         }
         return Response(context, status=200)
-    
+
     except PotholeDetection.DoesNotExist:
         return Response({"error": "Pothole not found"}, status=404)
     except Exception as e:
