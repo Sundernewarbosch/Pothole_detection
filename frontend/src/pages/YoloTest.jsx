@@ -130,8 +130,6 @@ function YoloTest() {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
 
-    setStreaming(false);
-
     const frame = canvas.toDataURL("image/jpeg");
 
     try {
@@ -151,7 +149,12 @@ function YoloTest() {
 
       if (!data.detections?.length) {
         showToast("No pothole detected.", "error");
+        setStreaming(true); // <-- FIX: ensure overlay is removed
+        setDangerVisible(false); // hide danger animation if any was left
+        setChatBubble(null); // hide bubble if any remained
+        return;
       } else {
+        setStreaming(false);
         setDetections(data.detections);
         setShowShare(true);
         setDangerVisible(true);
@@ -311,6 +314,16 @@ function YoloTest() {
     if (total) dangerRef.current.goToAndStop(total - 1, true);
   };
 
+  /* ---------------- Auto Scroll to Capture Button on Load ---------------- */
+  useEffect(() => {
+    if (buttonRef.current) {
+      buttonRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, []);
+
   return (
     <div className="yolo-container">
       <h1>Pothole Detection</h1>
@@ -327,7 +340,11 @@ function YoloTest() {
         />
 
         {/* Canvas ABOVE VIDEO */}
-        <canvas ref={canvasRef} className="yolo-canvas" />
+        <canvas
+          ref={canvasRef}
+          className="yolo-canvas"
+          style={{ display: streaming ? "none" : "block" }}
+        />
 
         {/* Overlay ABOVE canvas only when not streaming */}
         {!streaming && (
@@ -389,12 +406,16 @@ function YoloTest() {
       </button>
 
       {toast && (
-        <div
-          className={`toast ${
-            toast.type === "error" ? "error-toast" : "success-toast"
-          }`}
-        >
-          <p>{toast.message}</p>
+        <div className={`custom-toast ${toast.type}`}>
+          <div className="toast-icon">✔</div>
+
+          <div className="toast-content">
+            <h3 className="toast-title">
+              {toast.type === "error" ? "Oops!" : "Congratulations!"}
+            </h3>
+
+            <p className="toast-message">{toast.message}</p>
+          </div>
         </div>
       )}
     </div>
